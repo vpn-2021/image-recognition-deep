@@ -15,31 +15,31 @@ from keras.preprocessing import image
 from flask import Flask, redirect, url_for, request, render_template
 from werkzeug.utils import secure_filename
 from gevent.pywsgi import WSGIServer
+from tensorflow.keras.utils import load_img, img_to_array
 
 # Define a flask app
 app = Flask(__name__)
+
+# You can also use pretrained model from Keras
+# Check https://keras.io/applications/
+from tensorflow.keras.applications.resnet50 import ResNet50
+model = ResNet50(weights='imagenet')
+model.save('models/model_resnet.h5')
+print('Model loaded. Check http://127.0.0.1:5000/')
 
 # Model saved with Keras model.save()
 MODEL_PATH = 'models/model_resnet.h5'
 
 # Load your trained model
 model = load_model(MODEL_PATH)
-model._make_predict_function()          # Necessary
+model.make_predict_function()          # Necessary
 # print('Model loaded. Start serving...')
 
-# You can also use pretrained model from Keras
-# Check https://keras.io/applications/
-#from keras.applications.resnet50 import ResNet50
-#model = ResNet50(weights='imagenet')
-#model.save('')
-print('Model loaded. Check http://127.0.0.1:5000/')
-
-
 def model_predict(img_path, model):
-    img = image.load_img(img_path, target_size=(224, 224))
+    img = load_img(img_path, target_size=(224, 224))
 
     # Preprocessing the image
-    x = image.img_to_array(img)
+    x = img_to_array(img)
     # x = np.true_divide(x, 255)
     x = np.expand_dims(x, axis=0)
 
